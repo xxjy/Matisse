@@ -22,19 +22,21 @@ public class CaptureStrategy {
     public final boolean isPublic;
     public final String authority;
     public final File storageDir;
+    public final String directory;
 
     public CaptureStrategy(boolean isPublic, String authority) {
-        this(isPublic, authority, null);
+        this(isPublic, authority, null, null);
     }
 
     public CaptureStrategy(String authority, File storageDir) {
-        this(false, authority, storageDir);
+        this(false, authority, storageDir, null);
     }
 
-    public CaptureStrategy(boolean isPublic, String authority, File storageDir) {
+    public CaptureStrategy(boolean isPublic, String authority, File storageDir, String directory) {
         this.isPublic = isPublic;
         this.authority = authority;
         this.storageDir = storageDir;
+        this.directory = directory;
     }
 
 }
