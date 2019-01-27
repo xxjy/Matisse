@@ -27,13 +27,14 @@ import android.net.Uri;
 import android.provider.MediaStore;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.webkit.MimeTypeMap;
 
 import com.zhihu.matisse.MimeType;
 import com.zhihu.matisse.R;
 import com.zhihu.matisse.filter.Filter;
+import com.zhihu.matisse.internal.entity.IncapableCause;
 import com.zhihu.matisse.internal.entity.Item;
 import com.zhihu.matisse.internal.entity.SelectionSpec;
-import com.zhihu.matisse.internal.entity.IncapableCause;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -180,4 +181,10 @@ public final class PhotoMetadataUtils {
         result = result.replaceAll(",", "."); // in some case , 0.0 will be 0,0
         return Float.valueOf(result);
     }
+
+    public static String getMimeType(String filePath) {
+        String ext = MimeTypeMap.getFileExtensionFromUrl(filePath);
+        return MimeTypeMap.getSingleton().getMimeTypeFromExtension(ext);
+    }
+
 }
