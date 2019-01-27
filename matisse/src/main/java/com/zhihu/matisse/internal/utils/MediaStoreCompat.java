@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
@@ -105,15 +106,19 @@ public class MediaStoreCompat {
         }
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     private File createImageFile() throws IOException {
         // Create an image file name
         String timeStamp =
                 new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
-        String imageFileName = String.format("JPEG_%s.jpg", timeStamp);
+        String imageFileName = String.format("IMG_%s.jpg", timeStamp);
         File storageDir;
-        if (mCaptureStrategy.isPublic) {
+        if (mCaptureStrategy.storageDir != null) {
+            storageDir = mCaptureStrategy.storageDir;
+        } else if (mCaptureStrategy.isPublic) {
             storageDir = Environment.getExternalStoragePublicDirectory(
                     Environment.DIRECTORY_PICTURES);
+            if (!storageDir.exists()) storageDir.mkdirs();
         } else {
             storageDir = mContext.get().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
         }
@@ -136,4 +141,20 @@ public class MediaStoreCompat {
     public String getCurrentPhotoPath() {
         return mCurrentPhotoPath;
     }
+
+    public void galleryAddPic() {
+        Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+        File f = new File(mCurrentPhotoPath);
+        Uri contentUri = Uri.fromFile(f);
+        mediaScanIntent.setData(contentUri);
+        mContext.get().sendBroadcast(mediaScanIntent);
+
+        try {
+            MediaScannerConnection.scanFile(mContext.get().getApplicationContext(), new String[]{mCurrentPhotoPath}, null, null);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
 }

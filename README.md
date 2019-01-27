@@ -1,7 +1,8 @@
 ![Image](/image/banner.png)
 
 # Matisse
-[![Build Status](https://travis-ci.org/zhihu/Matisse.svg)](https://travis-ci.org/zhihu/Matisse)  
+[![Build Status](https://travis-ci.org/zhihu/Matisse.svg)](https://travis-ci.org/zhihu/Matisse) [ ![Download](https://api.bintray.com/packages/zhihu/maven/matisse/images/download.svg) ](https://bintray.com/zhihu/maven/matisse/_latestVersion)
+
 Matisse is a well-designed local image and video selector for Android. You can  
 - Use it in Activity or Fragment
 - Select images including JPEG, PNG, GIF and videos including MPEG, MP4 
@@ -23,7 +24,7 @@ repositories {
 }
 
 dependencies {
-    compile 'com.zhihu.android:matisse:0.5.1'
+    compile 'com.zhihu.android:matisse:$latest_version'
 }
 ```
 
@@ -125,3 +126,5 @@ This library is inspired by [Laevatein](https://github.com/nohana/Laevatein) and
     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
     See the License for the specific language governing permissions and
     limitations under the License.
+
+

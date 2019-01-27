@@ -35,6 +35,7 @@
         <item name="bottomToolbar.bg">@color/zhihu_bottom_toolbar_bg</item>
         <item name="bottomToolbar.preview.textColor">@color/zhihu_bottom_toolbar_preview</item>
         <item name="bottomToolbar.apply.textColor">@color/zhihu_bottom_toolbar_apply</item>
+        <item name="bottomToolbar.apply.background">?attr/selectableItemBackground</item>
         <item name="preview.bottomToolbar.back.textColor">@color/zhihu_preview_bottom_toolbar_back_text</item>
         <item name="preview.bottomToolbar.apply.textColor">@color/zhihu_preview_bottom_toolbar_apply</item>
         <item name="listPopupWindowStyle">@style/Popup.Zhihu</item>
@@ -68,6 +69,7 @@
         <item name="bottomToolbar.bg">@color/dracula_bottom_toolbar_bg</item>
         <item name="bottomToolbar.preview.textColor">@color/dracula_bottom_toolbar_preview</item>
         <item name="bottomToolbar.apply.textColor">@color/dracula_bottom_toolbar_apply</item>
+        <item name="bottomToolbar.apply.background">?attr/selectableItemBackground</item>
         <item name="preview.bottomToolbar.back.textColor">@color/dracula_preview_bottom_toolbar_back_text</item>
         <item name="preview.bottomToolbar.apply.textColor">@color/dracula_preview_bottom_toolbar_apply</item>
         <item name="android:listPopupWindowStyle">@style/Popup.Dracula</item>

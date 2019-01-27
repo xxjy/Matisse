@@ -15,13 +15,26 @@
  */
 package com.zhihu.matisse.internal.entity;
 
+import java.io.File;
+
 public class CaptureStrategy {
 
     public final boolean isPublic;
     public final String authority;
+    public final File storageDir;
 
     public CaptureStrategy(boolean isPublic, String authority) {
+        this(isPublic, authority, null);
+    }
+
+    public CaptureStrategy(String authority, File storageDir) {
+        this(false, authority, storageDir);
+    }
+
+    public CaptureStrategy(boolean isPublic, String authority, File storageDir) {
         this.isPublic = isPublic;
         this.authority = authority;
+        this.storageDir = storageDir;
     }
+
 }

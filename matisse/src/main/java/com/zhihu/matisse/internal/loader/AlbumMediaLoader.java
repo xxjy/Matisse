@@ -18,24 +18,22 @@ package com.zhihu.matisse.internal.loader;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.database.MatrixCursor;
-import android.database.MergeCursor;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.v4.content.CursorLoader;
 
+import com.zhihu.matisse.MimeType;
 import com.zhihu.matisse.internal.entity.Album;
-import com.zhihu.matisse.internal.entity.Item;
 import com.zhihu.matisse.internal.entity.SelectionSpec;
-import com.zhihu.matisse.internal.utils.MediaStoreCompat;
 
 /**
  * Load images and videos into a single cursor.
  */
 public class AlbumMediaLoader extends CursorLoader {
     private static final Uri QUERY_URI = MediaStore.Files.getContentUri("external");
-    private static final String[] PROJECTION = {
+    public static final String[] PROJECTION = {
             MediaStore.Files.FileColumns._ID,
+            MediaStore.MediaColumns.DATA,
             MediaStore.MediaColumns.DISPLAY_NAME,
             MediaStore.MediaColumns.MIME_TYPE,
             MediaStore.MediaColumns.SIZE,
@@ -62,6 +60,8 @@ public class AlbumMediaLoader extends CursorLoader {
         return new String[]{String.valueOf(mediaType)};
     }
     // =========================================================
+
+    private static final String NOT_GIF = " AND " + MediaStore.MediaColumns.MIME_TYPE + "!='image/gif'";
 
     // === params for ordinary album && showSingleMediaType: false ===
     private static final String SELECTION_ALBUM =
@@ -110,6 +110,9 @@ public class AlbumMediaLoader extends CursorLoader {
             if (SelectionSpec.getInstance().onlyShowImages()) {
                 selection = SELECTION_ALL_FOR_SINGLE_MEDIA_TYPE;
                 selectionArgs = getSelectionArgsForSingleMediaType(MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE);
+                if (SelectionSpec.getInstance().mimeTypeSet == null || !SelectionSpec.getInstance().mimeTypeSet.contains(MimeType.GIF)) {
+                    selection += NOT_GIF;
+                }
             } else if (SelectionSpec.getInstance().onlyShowVideos()) {
                 selection = SELECTION_ALL_FOR_SINGLE_MEDIA_TYPE;
                 selectionArgs = getSelectionArgsForSingleMediaType(MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO);
@@ -123,6 +126,9 @@ public class AlbumMediaLoader extends CursorLoader {
                 selection = SELECTION_ALBUM_FOR_SINGLE_MEDIA_TYPE;
                 selectionArgs = getSelectionAlbumArgsForSingleMediaType(MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE,
                         album.getId());
+                if (SelectionSpec.getInstance().mimeTypeSet == null || !SelectionSpec.getInstance().mimeTypeSet.contains(MimeType.GIF)) {
+                    selection += NOT_GIF;
+                }
             } else if (SelectionSpec.getInstance().onlyShowVideos()) {
                 selection = SELECTION_ALBUM_FOR_SINGLE_MEDIA_TYPE;
                 selectionArgs = getSelectionAlbumArgsForSingleMediaType(MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO,
@@ -138,13 +144,14 @@ public class AlbumMediaLoader extends CursorLoader {
 
     @Override
     public Cursor loadInBackground() {
-        Cursor result = super.loadInBackground();
+        return super.loadInBackground();
+        /*Cursor result = super.loadInBackground();
         if (!mEnableCapture || !MediaStoreCompat.hasCameraFeature(getContext())) {
             return result;
         }
         MatrixCursor dummy = new MatrixCursor(PROJECTION);
         dummy.addRow(new Object[]{Item.ITEM_ID_CAPTURE, Item.ITEM_DISPLAY_NAME_CAPTURE, "", 0, 0});
-        return new MergeCursor(new Cursor[]{dummy, result});
+        return new MergeCursor(new Cursor[]{dummy, result});*/
     }
 
     @Override

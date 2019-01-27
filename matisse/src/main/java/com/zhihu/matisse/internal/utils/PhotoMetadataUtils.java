@@ -114,7 +114,12 @@ public final class PhotoMetadataUtils {
                 if (cursor == null || !cursor.moveToFirst()) {
                     return null;
                 }
-                return cursor.getString(cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA));
+                int columnIndex = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
+                if (columnIndex > -1) {
+                    return cursor.getString(columnIndex);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             } finally {
                 if (cursor != null) {
                     cursor.close();
@@ -172,7 +177,7 @@ public final class PhotoMetadataUtils {
         df.applyPattern("0.0");
         String result = df.format((float) sizeInBytes / 1024 / 1024);
         Log.e(TAG, "getSizeInMB: " + result);
-        result = result.replaceAll(",","."); // in some case , 0.0 will be 0,0
+        result = result.replaceAll(",", "."); // in some case , 0.0 will be 0,0
         return Float.valueOf(result);
     }
 }

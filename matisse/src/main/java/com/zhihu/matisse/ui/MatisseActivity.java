@@ -26,6 +26,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
@@ -33,6 +34,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -83,6 +86,7 @@ public class MatisseActivity extends AppCompatActivity implements
     private AlbumsAdapter mAlbumsAdapter;
     private TextView mButtonPreview;
     private TextView mButtonApply;
+    private TextView mButtonNext;
     private View mContainer;
     private View mEmptyView;
 
@@ -101,7 +105,8 @@ public class MatisseActivity extends AppCompatActivity implements
             finish();
             return;
         }
-        setContentView(R.layout.activity_matisse);
+        setStatusBarLightMode(getWindow(), true);
+        setContentView(R.layout.activity_matisse_custom);
 
         if (mSpec.needOrientationRestriction()) {
             setRequestedOrientation(mSpec.orientation);
@@ -127,8 +132,10 @@ public class MatisseActivity extends AppCompatActivity implements
 
         mButtonPreview = (TextView) findViewById(R.id.button_preview);
         mButtonApply = (TextView) findViewById(R.id.button_apply);
+        mButtonNext = (TextView) findViewById(R.id.button_next);
         mButtonPreview.setOnClickListener(this);
         mButtonApply.setOnClickListener(this);
+        mButtonNext.setOnClickListener(this);
         mContainer = findViewById(R.id.container);
         mEmptyView = findViewById(R.id.empty_view);
         mOriginalLayout = findViewById(R.id.originalLayout);
@@ -150,6 +157,22 @@ public class MatisseActivity extends AppCompatActivity implements
         mAlbumCollection.onCreate(this, this);
         mAlbumCollection.onRestoreInstanceState(savedInstanceState);
         mAlbumCollection.loadAlbums();
+    }
+
+    public static void setStatusBarLightMode(@NonNull final Window window, final boolean isLightMode) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            View decorView = window.getDecorView();
+            if (decorView != null) {
+                int vis = decorView.getSystemUiVisibility();
+                if (isLightMode) {
+                    window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+                    vis |= View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+                } else {
+                    vis &= ~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+                }
+                decorView.setSystemUiVisibility(vis);
+            }
+        }
     }
 
     @Override
@@ -209,7 +232,7 @@ public class MatisseActivity extends AppCompatActivity implements
                 result.putStringArrayListExtra(EXTRA_RESULT_SELECTION_PATH, selectedPaths);
                 result.putExtra(EXTRA_RESULT_ORIGINAL_ENABLE, mOriginalEnable);
                 setResult(RESULT_OK, result);
-                finish();
+                finishThis(result);
             } else {
                 mSelectedCollection.overwrite(selected, collectionType);
                 Fragment mediaSelectionFragment = getSupportFragmentManager().findFragmentByTag(
@@ -221,7 +244,8 @@ public class MatisseActivity extends AppCompatActivity implements
             }
         } else if (requestCode == REQUEST_CODE_CAPTURE) {
             // Just pass the data back to previous calling Activity.
-            Uri contentUri = mMediaStoreCompat.getCurrentPhotoUri();
+            mMediaStoreCompat.galleryAddPic();
+            /*Uri contentUri = mMediaStoreCompat.getCurrentPhotoUri();
             String path = mMediaStoreCompat.getCurrentPhotoPath();
             ArrayList<Uri> selected = new ArrayList<>();
             selected.add(contentUri);
@@ -234,7 +258,18 @@ public class MatisseActivity extends AppCompatActivity implements
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP)
                 MatisseActivity.this.revokeUriPermission(contentUri,
                         Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            finish();
+            finish();*/
+           /* mContainer.post(new Runnable() {
+                @Override
+                public void run() {
+                    onItemSelected(null, null, 0, 0);
+                }
+            });*/
+            Fragment mediaSelectionFragment = getSupportFragmentManager().findFragmentByTag(
+                    MediaSelectionFragment.class.getSimpleName());
+            if (mediaSelectionFragment instanceof MediaSelectionFragment) {
+                ((MediaSelectionFragment) mediaSelectionFragment).addMedia(mMediaStoreCompat.getCurrentPhotoPath());
+            }
         }
     }
 
@@ -245,14 +280,20 @@ public class MatisseActivity extends AppCompatActivity implements
             mButtonPreview.setEnabled(false);
             mButtonApply.setEnabled(false);
             mButtonApply.setText(getString(R.string.button_sure_default));
+            mButtonNext.setEnabled(false);
+            mButtonNext.setText(getString(mSpec.buttonNextDefResId));
         } else if (selectedCount == 1 && mSpec.singleSelectionModeEnabled()) {
             mButtonPreview.setEnabled(true);
             mButtonApply.setText(R.string.button_sure_default);
             mButtonApply.setEnabled(true);
+            mButtonNext.setText(mSpec.buttonNextDefResId);
+            mButtonNext.setEnabled(true);
         } else {
             mButtonPreview.setEnabled(true);
             mButtonApply.setEnabled(true);
             mButtonApply.setText(getString(R.string.button_sure, selectedCount));
+            mButtonNext.setEnabled(true);
+            mButtonNext.setText(getString(mSpec.buttonNextResId, selectedCount));
         }
 
 
@@ -307,7 +348,7 @@ public class MatisseActivity extends AppCompatActivity implements
             intent.putExtra(BasePreviewActivity.EXTRA_DEFAULT_BUNDLE, mSelectedCollection.getDataWithBundle());
             intent.putExtra(BasePreviewActivity.EXTRA_RESULT_ORIGINAL_ENABLE, mOriginalEnable);
             startActivityForResult(intent, REQUEST_CODE_PREVIEW);
-        } else if (v.getId() == R.id.button_apply) {
+        } else if (v.getId() == R.id.button_apply || v.getId() == R.id.button_next) {
             Intent result = new Intent();
             ArrayList<Uri> selectedUris = (ArrayList<Uri>) mSelectedCollection.asListOfUri();
             result.putParcelableArrayListExtra(EXTRA_RESULT_SELECTION, selectedUris);
@@ -315,7 +356,7 @@ public class MatisseActivity extends AppCompatActivity implements
             result.putStringArrayListExtra(EXTRA_RESULT_SELECTION_PATH, selectedPaths);
             result.putExtra(EXTRA_RESULT_ORIGINAL_ENABLE, mOriginalEnable);
             setResult(RESULT_OK, result);
-            finish();
+            finishThis(result);
         } else if (v.getId() == R.id.originalLayout) {
             int count = countOverMaxSize();
             if (count > 0) {
@@ -332,6 +373,12 @@ public class MatisseActivity extends AppCompatActivity implements
             if (mSpec.onCheckedListener != null) {
                 mSpec.onCheckedListener.onCheck(mOriginalEnable);
             }
+        }
+    }
+
+    private void finishThis(Intent result) {
+        if (mSpec.onFinishListener == null || !mSpec.onFinishListener.onFinish(this, result)) {
+            finish();
         }
     }
 

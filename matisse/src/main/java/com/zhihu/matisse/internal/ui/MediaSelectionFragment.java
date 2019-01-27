@@ -17,6 +17,8 @@ package com.zhihu.matisse.internal.ui;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.database.MatrixCursor;
+import android.database.MergeCursor;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -34,7 +36,13 @@ import com.zhihu.matisse.internal.model.AlbumMediaCollection;
 import com.zhihu.matisse.internal.model.SelectedItemCollection;
 import com.zhihu.matisse.internal.ui.adapter.AlbumMediaAdapter;
 import com.zhihu.matisse.internal.ui.widget.MediaGridInset;
+import com.zhihu.matisse.internal.utils.MediaStoreCompat;
+import com.zhihu.matisse.internal.utils.PhotoMetadataUtils;
 import com.zhihu.matisse.internal.utils.UIUtils;
+
+import java.io.File;
+
+import static com.zhihu.matisse.internal.loader.AlbumMediaLoader.PROJECTION;
 
 public class MediaSelectionFragment extends Fragment implements
         AlbumMediaCollection.AlbumMediaCallbacks, AlbumMediaAdapter.CheckStateListener,
@@ -48,6 +56,8 @@ public class MediaSelectionFragment extends Fragment implements
     private SelectionProvider mSelectionProvider;
     private AlbumMediaAdapter.CheckStateListener mCheckStateListener;
     private AlbumMediaAdapter.OnMediaClickListener mOnMediaClickListener;
+    private Album album;
+    private Cursor rawCursor;
 
     public static MediaSelectionFragment newInstance(Album album) {
         MediaSelectionFragment fragment = new MediaSelectionFragment();
@@ -89,7 +99,7 @@ public class MediaSelectionFragment extends Fragment implements
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        Album album = getArguments().getParcelable(EXTRA_ALBUM);
+        album = getArguments().getParcelable(EXTRA_ALBUM);
 
         mAdapter = new AlbumMediaAdapter(getContext(),
                 mSelectionProvider.provideSelectedItemCollection(), mRecyclerView);
@@ -129,7 +139,14 @@ public class MediaSelectionFragment extends Fragment implements
 
     @Override
     public void onAlbumMediaLoad(Cursor cursor) {
-        mAdapter.swapCursor(cursor);
+        this.rawCursor = cursor;
+        Cursor newCursor = cursor;
+        if (album != null && album.isAll() && getContext() != null && MediaStoreCompat.hasCameraFeature(getContext())) {
+            MatrixCursor dummy = new MatrixCursor(PROJECTION);
+            dummy.addRow(new Object[]{Item.ITEM_ID_CAPTURE, Item.ITEM_PATH_CAPTURE, Item.ITEM_DISPLAY_NAME_CAPTURE, "", 0, 0});
+            newCursor = new MergeCursor(new Cursor[]{dummy, cursor});
+        }
+        mAdapter.swapCursor(newCursor);
     }
 
     @Override
@@ -150,6 +167,14 @@ public class MediaSelectionFragment extends Fragment implements
         if (mOnMediaClickListener != null) {
             mOnMediaClickListener.onMediaClick((Album) getArguments().getParcelable(EXTRA_ALBUM),
                     item, adapterPosition);
+        }
+    }
+
+    public void addMedia(String path) {
+        if (rawCursor != null && !rawCursor.isClosed()) {
+            MatrixCursor dummy = new MatrixCursor(PROJECTION);
+            dummy.addRow(new Object[]{Item.ITEM_ID_NEW, path, "", PhotoMetadataUtils.getMimeType(path), new File(path).length(), 0});
+            onAlbumMediaLoad(new MergeCursor(new Cursor[]{dummy, rawCursor}));
         }
     }
 

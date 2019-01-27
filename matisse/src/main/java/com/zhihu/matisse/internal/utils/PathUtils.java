@@ -98,14 +98,18 @@ public class PathUtils {
         try {
             cursor = context.getContentResolver().query(uri, projection, selection, selectionArgs, null);
             if (cursor != null && cursor.moveToFirst()) {
-                final int columnIndex = cursor.getColumnIndexOrThrow(column);
-                return cursor.getString(columnIndex);
+                final int columnIndex = cursor.getColumnIndex(column);
+                if (columnIndex > -1) {
+                    return cursor.getString(columnIndex);
+                }
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         } finally {
             if (cursor != null)
                 cursor.close();
         }
-        return null;
+        return uri.getPath();
     }
 
 

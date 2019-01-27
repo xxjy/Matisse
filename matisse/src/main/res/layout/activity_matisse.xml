@@ -36,9 +36,26 @@
             android:layout_height="?actionBarSize"
             android:drawableRight="@drawable/ic_arrow_drop_down_white_24dp"
             android:foreground="?selectableItemBackground"
+            android:maxWidth="180dp"
             android:gravity="center"
             android:textColor="?attr/album.element.color"
             android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/button_next"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:background="@drawable/btn_next_bg"
+            android:foreground="?selectableItemBackground"
+            android:layout_marginRight="8dp"
+            android:paddingBottom="5dp"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp"
+            android:paddingTop="5dp"
+            android:textColor="?attr/bottomToolbar.apply.textColor"
+            android:textSize="15sp" />
+
     </android.support.v7.widget.Toolbar>
 
     <FrameLayout
@@ -48,6 +65,7 @@
         android:layout_alignParentBottom="true"
         android:background="?attr/bottomToolbar.bg"
         android:elevation="4dp"
+        android:visibility="gone"
         tools:targetApi="lollipop">
 
         <TextView
@@ -111,6 +129,7 @@
         android:layout_height="match_parent"
         android:layout_above="@id/bottom_toolbar"
         android:layout_below="@id/toolbar"
+        android:layout_alignWithParentIfMissing="true"
         android:visibility="gone" />
 
     <FrameLayout

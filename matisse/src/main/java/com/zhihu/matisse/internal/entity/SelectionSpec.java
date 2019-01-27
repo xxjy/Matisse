@@ -17,6 +17,7 @@
 package com.zhihu.matisse.internal.entity;
 
 import android.content.pm.ActivityInfo;
+import android.support.annotation.StringRes;
 import android.support.annotation.StyleRes;
 
 import com.zhihu.matisse.MimeType;
@@ -25,6 +26,7 @@ import com.zhihu.matisse.engine.ImageEngine;
 import com.zhihu.matisse.engine.impl.GlideEngine;
 import com.zhihu.matisse.filter.Filter;
 import com.zhihu.matisse.listener.OnCheckedListener;
+import com.zhihu.matisse.listener.OnFinishListener;
 import com.zhihu.matisse.listener.OnSelectedListener;
 
 import java.util.List;
@@ -54,6 +56,11 @@ public final class SelectionSpec {
     public boolean originalable;
     public int originalMaxSize;
     public OnCheckedListener onCheckedListener;
+    @StringRes
+    public int buttonNextDefResId;
+    @StringRes
+    public int buttonNextResId;
+    public OnFinishListener onFinishListener;
 
     private SelectionSpec() {
     }
@@ -88,6 +95,8 @@ public final class SelectionSpec {
         hasInited = true;
         originalable = false;
         originalMaxSize = Integer.MAX_VALUE;
+        buttonNextDefResId = R.string.button_next_default;
+        buttonNextResId = R.string.button_next;
     }
 
     public boolean singleSelectionModeEnabled() {

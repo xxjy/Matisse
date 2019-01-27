@@ -26,6 +26,8 @@ import android.support.annotation.Nullable;
 
 import com.zhihu.matisse.MimeType;
 
+import java.io.File;
+
 public class Item implements Parcelable {
     public static final Creator<Item> CREATOR = new Creator<Item>() {
         @Override
@@ -40,16 +42,20 @@ public class Item implements Parcelable {
         }
     };
     public static final long ITEM_ID_CAPTURE = -1;
+    public static final long ITEM_ID_NEW = -2;
     public static final String ITEM_DISPLAY_NAME_CAPTURE = "Capture";
+    public static final String ITEM_PATH_CAPTURE = "Capture";
     public final long id;
+    public final String path;
     public final String mimeType;
     public final Uri uri;
     public final long size;
     public final long duration; // only for video, in ms
 
-    private Item(long id, String mimeType, long size, long duration) {
+    private Item(long id, String path, String mimeType, long size, long duration) {
         this.id = id;
         this.mimeType = mimeType;
+        this.path = path;
         Uri contentUri;
         if (isImage()) {
             contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
@@ -59,13 +65,18 @@ public class Item implements Parcelable {
             // ?
             contentUri = MediaStore.Files.getContentUri("external");
         }
-        this.uri = ContentUris.withAppendedId(contentUri, id);
+        if (id == ITEM_ID_NEW) {
+            this.uri = Uri.fromFile(new File(path));
+        } else {
+            this.uri = ContentUris.withAppendedId(contentUri, id);
+        }
         this.size = size;
         this.duration = duration;
     }
 
     private Item(Parcel source) {
         id = source.readLong();
+        path = source.readString();
         mimeType = source.readString();
         uri = source.readParcelable(Uri.class.getClassLoader());
         size = source.readLong();
@@ -74,6 +85,7 @@ public class Item implements Parcelable {
 
     public static Item valueOf(Cursor cursor) {
         return new Item(cursor.getLong(cursor.getColumnIndex(MediaStore.Files.FileColumns._ID)),
+                cursor.getString(cursor.getColumnIndex(MediaStore.MediaColumns.DATA)),
                 cursor.getString(cursor.getColumnIndex(MediaStore.MediaColumns.MIME_TYPE)),
                 cursor.getLong(cursor.getColumnIndex(MediaStore.MediaColumns.SIZE)),
                 cursor.getLong(cursor.getColumnIndex("duration")));
@@ -87,6 +99,7 @@ public class Item implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeLong(id);
+        dest.writeString(path);
         dest.writeString(mimeType);
         dest.writeParcelable(uri, 0);
         dest.writeLong(size);
@@ -135,25 +148,32 @@ public class Item implements Parcelable {
         }
 
         Item other = (Item) obj;
-        return id == other.id
+        return path != null && path.equalsIgnoreCase(other.path);
+        /*return id == other.id
+                && (path != null && path.equals(other.path)
+                || (path == null && other.path == null))
                 && (mimeType != null && mimeType.equals(other.mimeType)
-                    || (mimeType == null && other.mimeType == null))
+                || (mimeType == null && other.mimeType == null))
                 && (uri != null && uri.equals(other.uri)
-                    || (uri == null && other.uri == null))
+                || (uri == null && other.uri == null))
                 && size == other.size
-                && duration == other.duration;
+                && duration == other.duration;*/
     }
 
     @Override
     public int hashCode() {
-        int result = 1;
+        return path == null ? 0 : path.hashCode();
+        /*int result = 1;
         result = 31 * result + Long.valueOf(id).hashCode();
+        if (path != null) {
+            result = 31 * result + path.hashCode();
+        }
         if (mimeType != null) {
             result = 31 * result + mimeType.hashCode();
         }
         result = 31 * result + uri.hashCode();
         result = 31 * result + Long.valueOf(size).hashCode();
         result = 31 * result + Long.valueOf(duration).hashCode();
-        return result;
+        return result;*/
     }
 }

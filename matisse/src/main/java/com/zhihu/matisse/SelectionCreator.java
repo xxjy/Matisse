@@ -23,6 +23,7 @@ import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
+import android.support.annotation.StringRes;
 import android.support.annotation.StyleRes;
 import android.support.v4.app.Fragment;
 
@@ -31,6 +32,7 @@ import com.zhihu.matisse.filter.Filter;
 import com.zhihu.matisse.internal.entity.CaptureStrategy;
 import com.zhihu.matisse.internal.entity.SelectionSpec;
 import com.zhihu.matisse.listener.OnCheckedListener;
+import com.zhihu.matisse.listener.OnFinishListener;
 import com.zhihu.matisse.listener.OnSelectedListener;
 import com.zhihu.matisse.ui.MatisseActivity;
 
@@ -329,6 +331,21 @@ public final class SelectionCreator {
      */
     public SelectionCreator setOnCheckedListener(@Nullable OnCheckedListener listener) {
         mSelectionSpec.onCheckedListener = listener;
+        return this;
+    }
+
+    public SelectionCreator setOnFinishListener(@Nullable OnFinishListener listener) {
+        mSelectionSpec.onFinishListener = listener;
+        return this;
+    }
+
+    public SelectionCreator buttonNextDefResId(@StringRes int buttonNextDefResId) {
+        mSelectionSpec.buttonNextDefResId = buttonNextDefResId;
+        return this;
+    }
+
+    public SelectionCreator buttonNextResId(@StringRes int buttonNextResId) {
+        mSelectionSpec.buttonNextResId = buttonNextResId;
         return this;
     }
 

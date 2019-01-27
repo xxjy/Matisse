@@ -37,6 +37,7 @@ public class AlbumMediaCollection implements LoaderManager.LoaderCallbacks<Curso
     private WeakReference<Context> mContext;
     private LoaderManager mLoaderManager;
     private AlbumMediaCallbacks mCallbacks;
+    private boolean mLoadFinished;
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
@@ -44,7 +45,7 @@ public class AlbumMediaCollection implements LoaderManager.LoaderCallbacks<Curso
         if (context == null) {
             return null;
         }
-
+        mLoadFinished = false;
         Album album = args.getParcelable(ARGS_ALBUM);
         if (album == null) {
             return null;
@@ -61,7 +62,10 @@ public class AlbumMediaCollection implements LoaderManager.LoaderCallbacks<Curso
             return;
         }
 
-        mCallbacks.onAlbumMediaLoad(data);
+        if (!mLoadFinished) {
+            mLoadFinished = true;
+            mCallbacks.onAlbumMediaLoad(data);
+        }
     }
 
     @Override
